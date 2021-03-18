@@ -1,0 +1,245 @@
+#!/bin/bash
+
+base_pkg=(acpid acpilight alsa-utils avahi bluez bluez-utils cifs-utils cups curl dhcpcd dialog dkms git htop ifplugd libinput libreoffice linux-headers man netctl openssh pulseaudio pulseaudio-alsa pulsemixer python python-pip ranger redshift rsync scrot sshfs sudo terminator thunderbird ttf-dejavu ttf-font-awesome ttf-nerd-fonts-symbols udevil unzip upower vim vivaldi wget wqy-zenhei xorg-server zsh)
+
+aur_base=(nextcloud-client spotify)
+
+i3_pkg=(i3lock i3status-rust i3-wm iw lightdm lightdm-gtk-greeter playerctl rofi xss-lock)
+i3_aur=(xidlehook)
+
+laptop_pkg=(xbindkeys xdotool xf86-video-intel)
+laptop_aur=(libinput-gestures)
+
+function aur_helper() {
+  pacman -S git
+  cd /tmp
+  git clone https://aur.archlinux.org/yay.git
+  cd yay
+  sudo -u $user makepkg -si
+}
+
+function bootmethod() {
+  read -p 'Bootmethod: UEFI (1), BIOS (2): ' boot
+}
+
+function config() {
+  read -p 'Configuration: Desktop (1), Laptop (2): ' config
+}
+
+function root_part() {
+  read -p 'Root partition /dev/sdXY :' root_part
+}
+
+function vga() {
+  read -p 'Graphics driver :' vga
+}
+
+function wm() {
+  read -p 'Window manager: i3 (1): ' wm_idx
+}
+
+read -p 'Hostname: ' hostname
+read -sp 'Root password: ' root_pw
+read -p 'User: ' user
+read -sp 'Password for flo: ' user_pw
+bootmethod
+while [[ $boot -ne 1 || $boot -ne 2 ]]; do
+  bootmethod
+done
+config
+while [[ $config -ne 1 || $config -ne 2 ]]; do
+  config
+done
+root_part
+while [[ ! -e $root_part ]]; do
+  root_part
+done
+wm
+while [[ $wm_idx -ne 1 ]]; do
+  wm
+done
+if [[ $wm_idx -eq 1 ]]; then
+  wm='i3'
+fi
+
+if [[ $(lspci | grep VGA | grep -i intel | wc -l) -gt 0 ]]; then
+  vga="xf86-video-intel"
+elif [[ $(lspci | grep VGA | grep -i amd | wc -l) -gt 0 ]]; then
+  vga="xf86-video-amdgpu"
+elif [[ $(lspci | grep VGA | grep -i nvidia | wc -l) -gt 0 ]]; then
+  vga="xf86-video-nouveau"
+else
+  vga
+  while [[ $(pacman -Ss ^$vga\$ | wc -l) -eq 0 ]]; do
+    vga
+  done
+fi
+
+echo "Install base packages"
+pacman -S $base_pkg
+
+echo "$hostname" > /etc/hostname
+
+echo "Set locales"
+echo "LANG=de_DE.UTF-8" > /etc/locale.conf
+
+sed -i 's/^#de_DE.UTF-8 UTF-8/de_DE.UTF-8 UTF-8/g' /etc/locale.gen
+sed -i 's/^#de_DE ISO-8859-1/de_DE ISO-8859-1/g' /etc/locale.gen
+sed -i 's/^#de_DE@euro ISO-8859-15/de_DE@euro ISO-8859-15/g' /etc/locale.gen
+sed -i 's/^#en_US.UTF-8/en_US.UTF-8/g' /etc/locale.gen
+
+locale-gen
+
+echo "Set timezone"
+ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
+
+mkinitcpio -p linux
+
+echo "Set root password"
+(echo "$root_pw"; echo "$root_pw") | passwd
+
+echo "Setup bootloader"
+if [[ $boot -eq 1 ]]; then
+  bootctl install
+  t='Arch Linux'
+  t_f="$t Fallback"
+  l='/vmlinuz-linux'
+  i='/initramfs-linux.img'
+  i_f='/initramfs-linux-fallback.img'
+  o="root=$root_part rw lang=de init=/usr/lib/systemd/systemd locale=de_DE.UTF-8"
+  f='/boot/loader/entries/arch-uefi.conf'
+  f_f='/boot/loader/entries/arch-uefi-fallback.conf'
+  echo "title   $t" > $f
+  echo "linux   $l" >> $f
+  echo "initrd  $i" >> $f
+  echo "options $o" >> $f
+
+  echo "title   $t_f" > $f_f
+  echo "linux   $l" >> $f_f
+  echo "initrd  $i_f" >> $f_f
+  echo "options $o" >> $f_f
+
+  echo 'default arch-uefi.conf' > /boot/loader/loader.conf
+  echo 'timeout 5' >> /boot/loader/loader.conf
+
+  bootctl update
+fi
+
+echo "Add user $user"
+useradd -m -g users -s $(which zsh) $user
+(echo "$user_pw"; echo "$user_pw") | passwd $user
+for group in wheel audio video input; do
+  gpasswd -a $user $group
+done
+
+sed -i 's/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
+
+echo "Install aur helper"
+aur_helper
+
+sudo -u $user yay -S $base_aur
+
+echo "Intall packages for $wm"
+if [[ $wm == "i3" ]]; then
+  pacman -S $i3_pkg
+  sudo -u $user yay -S $i3_aur
+fi
+
+echo "Set keymap"
+localectl set-x11-keymap us "" intl
+echo 'KEYMAP=en_US' > /etc/vconsole.conf
+
+if [[ $config -eq 2 ]]; then
+  echo "Start configuration for Laptop"
+  pacman -S $laptop_pkg
+  sudo -u $user yay -S $laptop_aur
+
+  cat <<EOF >>/etc/X11/xorg.conf.d/40-libinput.conf
+Section "InputClass"
+  Identifier "/dev/input/event6"
+  MatchIsTouchpad "on"
+  Driver "libinput"
+  Option "Tapping" "off"
+  Option "TappingButtonMap" "lrm"
+  Option "NaturalScrolling" "true"
+  Option "ClickMethod" "clickfinger"
+EndSection
+EOF
+
+  cat <<EOF >>/etc/udev/rules.d/backlight.rules
+ACTION=="add", SUBSYSTEM=="backlight", KERNEL=="intel_backlight", GROUP="video", MODE="0664"
+EOF
+  cat <<EOF >>/etc/udev/rules.d/99-lowbat.rules
+SUBSYSTEM=="power_supply", ATTR{status}=="Discharging", ATTR{capacity}=="[0-5]", RUN+="/usr/bin/systemctl suspend"
+EOF
+
+  cat <<EOF >>/etc/acpi/handlers/bl
+#!/bin/sh
+step=5
+
+# for this to work you have to install the package acpilight
+case \$1 in
+    -) /usr/bin/xbacklight -dec \$step;;
+    +) /usr/bin/xbacklight -inc \$step;;
+esac
+EOF
+  chmod 755 /etc/acpi/handlers/bl
+
+  cat <<EOF >>/etc/acpi/events/bl_u
+event=video/brightnessup
+action=/etc/acpi/handlers/bl +
+EOF
+
+  cat <<EOF >>/etc/acpi/events/bl_d
+event=video/brightnessup
+action=/etc/acpi/handlers/bl -
+EOF
+fi
+
+echo "Set xorg power options"
+cat <<EOF >>/etc/xorg.conf.d/10-disable-xorg-power-options.conf
+Section "Monitor"
+  Identifier "Monitor1"
+  Option "DPMS" "false"
+EndSection
+
+Section "ServerFlags"
+  Option "BlankTime" "0"
+EndSection
+EOF
+
+cat <<EOF >>/etc/acpi/events/powerbtn
+event=button/power
+action=/usr/bin/i3lock && sleep 1 && /usr/bin/systemctl suspend
+EOF
+
+line_no=$(grep -noe ^allowed_types /etc/udevil/udevil.conf | cut -f1 -d:)
+sed -i "$line_nos/$/, cifs/" /etc/udevil/udevil.conf
+
+echo "Setup netctl"
+cp /etc/netctl/examples/wireless-wpa /etc/netctl/wireless-wpa
+cp /etc/netctl/examples/ethernet-dhcp /etc/netctl/ethernet-dhcp
+
+echo "Enable systemd services"
+for srv in acpid avahi-daemon cups.servce bluetooth.service netctl-ifplugd@eth0.service netctl-auto@wlp2s0.service; do
+  systemctl enable $srv
+done
+for usr_srv in pulseaudio.service pulseaudio.socket; do
+  sudo -u $user systemctl enable $usr_srv
+done
+systemctl enable --now fstrim.timer
+systemctl enable --now systemd-timesycd.service
+
+if [[ $wm == "i3" ]]; then
+  systemctl enable lightdm.service
+fi
+
+echo "Install dotfiles for root"
+cd /root
+git clone https://github.com/floriansto/dotfiles.git
+./dotfiles/install.sh noconfirm
+
+echo "Install dotfiles for $user"
+cd /home/$user
+sudo -u $flo git clone https://github.com/floriansto/dotfiles.git
+sudo -u $flo ./dotfiles/install.sh
