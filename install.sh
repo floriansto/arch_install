@@ -1,6 +1,6 @@
 #!/bin/bash
 
-base_pkg=(acpid acpilight alsa-utils avahi bluez bluez-utils cifs-utils cups curl dhcpcd dialog dkms git htop ifplugd libinput libreoffice linux-headers man netctl openssh pulseaudio pulseaudio-alsa pulsemixer python python-pip ranger redshift rsync scrot sshfs sudo terminator thunderbird ttf-dejavu ttf-font-awesome ttf-nerd-fonts-symbols udevil unzip upower vim vivaldi wget wqy-zenhei xorg-server zsh)
+base_pkg=(acpid acpilight alsa-utils avahi bluez bluez-utils cifs-utils cups curl dhcpcd dialog dkms git htop ifplugd libinput libreoffice linux-headers man nemo nemo-fileroller nemo-share netctl openssh p7zip pulseaudio pulseaudio-alsa pulsemixer python python-pip qpdfview ranger redshift rsync scrot sshfs sudo terminator thunderbird ttf-dejavu ttf-font-awesome ttf-nerd-fonts-symbols udevil unzip upower vim vivaldi wget wqy-zenhei xorg-server zsh)
 
 aur_base=(nextcloud-client spotify)
 
@@ -11,7 +11,6 @@ laptop_pkg=(xbindkeys xdotool xf86-video-intel)
 laptop_aur=(libinput-gestures)
 
 function aur_helper() {
-  pacman -S git
   cd /tmp
   git clone https://aur.archlinux.org/yay.git
   cd yay
@@ -241,5 +240,7 @@ git clone https://github.com/floriansto/dotfiles.git
 
 echo "Install dotfiles for $user"
 cd /home/$user
+[[ ! -d Development ]] mkdir Development
+cd Development
 sudo -u $flo git clone https://github.com/floriansto/dotfiles.git
 sudo -u $flo ./dotfiles/install.sh
