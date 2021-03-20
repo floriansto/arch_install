@@ -9,6 +9,8 @@ i3_aur=(autotiling xidlehook)
 laptop_pkg=(xbindkeys xdotool xf86-video-intel)
 laptop_aur=(libinput-gestures)
 
+desktop_aur=(rtl8814au-aircrack-dkms-git)
+
 user_pkg=(firefox gimp gparted gpicview libreoffice nemo nemo-fileroller nemo-share octave qpdfview speedcrunch thunderbird vivaldi vlc)
 user_aur=(bitwarden nextcloud-client plex-media-player spotify teams zoom)
 
@@ -202,6 +204,8 @@ EOF
 event=video/brightnessdown
 action=/etc/acpi/handlers/bl -
 EOF
+else
+  sudo -u $user yay -S --noconfirm ${desktop_aur[@]}
 fi
 
 echo "Set xorg power options"
@@ -276,4 +280,17 @@ echo 'KEYMAP=en_US' > /etc/vconsole.conf
 echo "Install user packages"
 pacman -S --noconfirm ${user_pkg[@]}
 sudo -u $user yay -S ${user_aur[@]}
+
+if [[ $(which vivialdi-stable) ]]; then
+  /opt/vivaldi-stable/update-ffmpeg
+  /opt/vivaldi-stable/update-widevine
+fi
+
+echo "Install droidcam"
+cd /tmp
+wget -O droidcam_latest.zip https://files.dev47apps.net/linux/droidcam_1.7.2.zip
+unzip droidcam_latest.zip -d droidcam
+cd droidcam && ./install-client
+./install-video
+./install-dkms
 
