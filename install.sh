@@ -236,8 +236,9 @@ event=button/power
 action=/usr/bin/i3lock && sleep 1 && /usr/bin/systemctl suspend
 EOF
 
+echo "Setup udevil"
 line_no=$(grep -noe ^allowed_types /etc/udevil/udevil.conf | cut -f1 -d:)
-sed -i "$line_nos/$/, cifs/" /etc/udevil/udevil.conf
+sed -i "${line_no}s/$/, cifs/" /etc/udevil/udevil.conf
 
 echo "Setup netctl"
 cp /etc/netctl/examples/wireless-wpa /etc/netctl/wireless-wpa
