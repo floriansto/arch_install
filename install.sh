@@ -244,6 +244,7 @@ fi
 
 echo "Install dotfiles for root"
 cd /root
+[[ -d dotfiles ]] rm -rf dotfiles
 git clone https://github.com/floriansto/dotfiles.git
 ./dotfiles/install.sh noconfirm
 
@@ -253,6 +254,7 @@ if [[ ! -d Development ]]; then
   sudo -u $user mkdir Development
 fi
 cd Development
+[[ -d dotfiles ]] rm -rf dotfiles
 sudo -u $user git clone https://github.com/floriansto/dotfiles.git
 sudo -u $user ./dotfiles/install.sh noconfirm
 
