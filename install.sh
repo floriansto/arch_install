@@ -13,6 +13,7 @@ laptop_aur=(libinput-gestures)
 function aur_helper() {
   cd /tmp
   git clone https://aur.archlinux.org/yay.git
+  chown -R $user:users yay/
   cd yay
   sudo -u $user makepkg -si
 }
@@ -43,9 +44,13 @@ function wm() {
 }
 
 read -p 'Hostname: ' hostname
+echo ""
 read -sp 'Root password: ' root_pw
+echo ""
 read -p 'User: ' user
+echo ""
 read -sp 'Password for flo: ' user_pw
+echo ""
 bootmethod
 while [[ $boot != "1" && $boot != "2" ]]; do
   bootmethod
