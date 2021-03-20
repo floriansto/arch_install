@@ -80,7 +80,7 @@ else
 fi
 
 echo "Install base packages"
-pacman -S $base_pkg
+pacman -S ${base_pkg[@]}
 
 echo "$hostname" > /etc/hostname
 
