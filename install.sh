@@ -335,7 +335,7 @@ Section "InputClass"
     Identifier "system-keyboard"
     MatchIsKeyboard "on"
     Option "XkbLayout" "us"
-    Option "XkbVariant" "ïntl"
+    Option "XkbVariant" "altgr-intl"
 EndSection
 EOF
 echo 'KEYMAP=en_US' > /etc/vconsole.conf
