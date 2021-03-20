@@ -18,28 +18,28 @@ function aur_helper() {
 }
 
 function bootmethod() {
-  echo ""
   read -p 'Bootmethod: UEFI (1), BIOS (2): ' boot
+  echo ""
 }
 
 function config() {
-  echo ""
   read -p 'Configuration: Desktop (1), Laptop (2): ' config
+  echo ""
 }
 
 function root_part() {
-  echo ""
   read -p 'Root partition /dev/sdXY :' root_part
+  echo ""
 }
 
 function vga() {
-  echo ""
   read -p 'Graphics driver :' vga
+  echo ""
 }
 
 function wm() {
-  echo ""
   read -p 'Window manager: i3 (1): ' wm_idx
+  echo ""
 }
 
 read -p 'Hostname: ' hostname
@@ -249,5 +249,5 @@ if [[ ! -d Development ]]; then
   mkdir Development
 fi
 cd Development
-sudo -u $flo git clone https://github.com/floriansto/dotfiles.git
-sudo -u $flo ./dotfiles/install.sh
+sudo -u $user git clone https://github.com/floriansto/dotfiles.git
+sudo -u $user ./dotfiles/install.sh
