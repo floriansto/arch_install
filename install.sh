@@ -224,6 +224,15 @@ event=video/brightnessdown
 action=/etc/acpi/handlers/bl -
 EOF
 
+  cat <<EOF >/etc/netctl/ethernet-dhcp
+Description='A basic dhcp ethernet connection'
+Interface=enp4s0
+Connection=ethernet
+IP=dhcp
+EOF
+  systemctl enable netctl-ifplugd@enp4s0.service
+  systemctl enable netctl-auto@wlp2s0.service
+  p
 else
 
   sudo -u $user $yays ${desktop_aur[@]}
@@ -242,6 +251,8 @@ speed_matrix:  # -[temp(*C), speed(0-100%)]
 #         # ls /sys/class/drm | grep "^card[[:digit:]]$"
 # - card0
 EOF
+  systemctl enable amdgpu-fan.service
+  systemctl start amdgpu-fan.service
 
   cat <<EOF >/etc/modprobe.d/nobeep.conf
 blacklist pcspkr
@@ -250,6 +261,15 @@ EOF
   cat <<EOF >/etc/modprobe.d/audio-fixes.conf
 options snd_hda_intel power_save=0
 EOF
+
+  cat <<EOF >/etc/netctl/ethernet-dhcp
+Description='A basic dhcp ethernet connection'
+Interface=enp4s0
+Connection=ethernet
+IP=dhcp
+EOF
+  systemctl enable netctl-ifplugd@enp4s0.service
+  systemctl enable netctl-auto@wlp6s0u2.service
 
 fi
 
@@ -274,12 +294,8 @@ echo "Setup udevil"
 line_no=$(grep -noe ^allowed_types /etc/udevil/udevil.conf | cut -f1 -d:)
 sed -i "${line_no}s/$/, cifs/" /etc/udevil/udevil.conf
 
-echo "Setup netctl"
-cp /etc/netctl/examples/wireless-wpa /etc/netctl/wireless-wpa
-cp /etc/netctl/examples/ethernet-dhcp /etc/netctl/ethernet-dhcp
-
 echo "Enable systemd services"
-for srv in acpid avahi-daemon cronie.service cups.service bluetooth.service netctl-ifplugd@eth0.service netctl-auto@wlp2s0.service; do
+for srv in acpid avahi-daemon cronie.service cups.service bluetooth.service; do
   systemctl enable $srv
   systemctl start $srv
 done
