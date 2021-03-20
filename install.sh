@@ -85,7 +85,7 @@ else
 fi
 
 echo "Install base packages"
-pacman -S ${base_pkg[@]}
+pacman -S --noconfirm ${base_pkg[@]}
 
 echo "$hostname" > /etc/hostname
 
@@ -150,14 +150,14 @@ sudo -u $user yay -S ${base_aur[@]}
 
 echo "Intall packages for $wm"
 if [[ $wm == "i3" ]]; then
-  pacman -S ${i3_pkg[@]}
-  sudo -u $user yay -S ${i3_aur[@]}
+  pacman -S --noconfirm ${i3_pkg[@]}
+  sudo -u $user yay -S --noconfirm ${i3_aur[@]}
 fi
 
 if [[ $config -eq 2 ]]; then
   echo "Start configuration for Laptop"
-  pacman -S ${laptop_pkg[@]}
-  sudo -u $user yay -S ${laptop_aur[@]}
+  pacman -S --noconfirm ${laptop_pkg[@]}
+  sudo -u $user yay -S --noconfirm ${laptop_aur[@]}
 
   cat <<EOF >>/etc/X11/xorg.conf.d/40-libinput.conf
 Section "InputClass"
@@ -247,16 +247,16 @@ git clone https://github.com/floriansto/dotfiles.git
 echo "Install dotfiles for $user"
 cd /home/$user
 if [[ ! -d Development ]]; then
-  mkdir Development
-  chown -R $user:users
+  sudo -u $user mkdir Development
 fi
 cd Development
 sudo -u $user git clone https://github.com/floriansto/dotfiles.git
-chown -R $user:users dotfiles
 sudo -u $user ./dotfiles/install.sh noconfirm
 
 echo "Set keymap"
-localectl set-x11-keymap us "" intl
+
+
+sudo -u $user localectl set-x11-keymap us "" intl
 echo 'KEYMAP=en_US' > /etc/vconsole.conf
 
 
