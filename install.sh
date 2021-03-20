@@ -351,6 +351,7 @@ EOF
 cat <<EOF >/var/spool/cron/$user
 0 */2 * * * /opt/scripts_linux/backupPacman.sh > /dev/null
 EOF
+./keychron/install.sh
 
 echo "Setup ssh"
 ssh=/etc/ssh/sshd_config
@@ -359,9 +360,10 @@ sed -i 's/^#PermitRootLogin prohibit-password/PermitRootLogin prohibit-password/
 sed -i 's/^#PubkeyAuthentication yes/PubkeyAuthentication yes/' $ssh
 
 echo "Install droidcam"
-cd /tmp
+cd /opt
 wget -O droidcam_latest.zip https://files.dev47apps.net/linux/droidcam_1.7.2.zip
 unzip droidcam_latest.zip -d droidcam
+rm droidcam_latest.zip
 cd droidcam && ./install-client
 ./install-video
 
