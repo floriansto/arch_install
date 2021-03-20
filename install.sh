@@ -42,11 +42,11 @@ read -sp 'Root password: ' root_pw
 read -p 'User: ' user
 read -sp 'Password for flo: ' user_pw
 bootmethod
-while [[ $boot -ne 1 || $boot -ne 2 ]]; do
+while [[ $boot -ne 1 && $boot -ne 2 ]]; do
   bootmethod
 done
 config
-while [[ $config -ne 1 || $config -ne 2 ]]; do
+while [[ $config -ne 1 && $config -ne 2 ]]; do
   config
 done
 root_part
@@ -240,7 +240,9 @@ git clone https://github.com/floriansto/dotfiles.git
 
 echo "Install dotfiles for $user"
 cd /home/$user
-[[ ! -d Development ]] mkdir Development
+if [[ ! -d Development ]]; then
+  mkdir Development
+fi
 cd Development
 sudo -u $flo git clone https://github.com/floriansto/dotfiles.git
 sudo -u $flo ./dotfiles/install.sh
