@@ -42,11 +42,11 @@ read -sp 'Root password: ' root_pw
 read -p 'User: ' user
 read -sp 'Password for flo: ' user_pw
 bootmethod
-while [[ $boot -ne 1 && $boot -ne 2 ]]; do
+while [[ $boot != "1" && $boot != "2" ]]; do
   bootmethod
 done
 config
-while [[ $config -ne 1 && $config -ne 2 ]]; do
+while [[ $config != "1" && $config != "2" ]]; do
   config
 done
 root_part
@@ -54,10 +54,10 @@ while [[ ! -e $root_part ]]; do
   root_part
 done
 wm
-while [[ $wm_idx -ne 1 ]]; do
+while [[ $wm_idx != "1" ]]; do
   wm
 done
-if [[ $wm_idx -eq 1 ]]; then
+if [[ $wm_idx != "1" ]]; then
   wm='i3'
 fi
 
