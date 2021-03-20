@@ -67,7 +67,7 @@ wm
 while [[ $wm_idx != "1" ]]; do
   wm
 done
-if [[ $wm_idx != "1" ]]; then
+if [[ $wm_idx -eq 1 ]]; then
   wm='i3'
 fi
 
@@ -153,10 +153,6 @@ if [[ $wm == "i3" ]]; then
   pacman -S ${i3_pkg[@]}
   sudo -u $user yay -S ${i3_aur[@]}
 fi
-
-echo "Set keymap"
-localectl set-x11-keymap us "" intl
-echo 'KEYMAP=en_US' > /etc/vconsole.conf
 
 if [[ $config -eq 2 ]]; then
   echo "Start configuration for Laptop"
@@ -252,7 +248,15 @@ echo "Install dotfiles for $user"
 cd /home/$user
 if [[ ! -d Development ]]; then
   mkdir Development
+  chown -R $user:users
 fi
 cd Development
 sudo -u $user git clone https://github.com/floriansto/dotfiles.git
-sudo -u $user ./dotfiles/install.sh
+chown -R $user:users dotfiles
+sudo -u $user ./dotfiles/install.sh noconfirm
+
+echo "Set keymap"
+localectl set-x11-keymap us "" intl
+echo 'KEYMAP=en_US' > /etc/vconsole.conf
+
+
