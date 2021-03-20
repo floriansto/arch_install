@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+trap 'error_exit $LINENO $?' ERR SIGTERM SIGINT
 
 pacmans="pacman -S --noconfirm --needed"
 yays="yay -S --noconfirm --needed"
@@ -17,6 +18,10 @@ desktop_aur=(rtl8814au-aircrack-dkms-git)
 
 user_pkg=(firefox gimp gparted gpicview libreoffice nemo nemo-fileroller nemo-share octave qpdfview speedcrunch thunderbird vivaldi vlc)
 user_aur=(bitwarden nextcloud-client plex-media-player spotify teams zoom)
+
+function error_exit() {
+  echo "Errorcod $2 in line $1"
+}
 
 function aur_helper() {
   cd /tmp
@@ -245,7 +250,7 @@ cp /etc/netctl/examples/wireless-wpa /etc/netctl/wireless-wpa
 cp /etc/netctl/examples/ethernet-dhcp /etc/netctl/ethernet-dhcp
 
 echo "Enable systemd services"
-for srv in acpid avahi-daemon cups.servce bluetooth.service netctl-ifplugd@eth0.service netctl-auto@wlp2s0.service; do
+for srv in acpid avahi-daemon cups.service bluetooth.service netctl-ifplugd@eth0.service netctl-auto@wlp2s0.service; do
   systemctl enable $srv
 done
 for usr_srv in pulseaudio.service pulseaudio.socket; do
