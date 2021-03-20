@@ -255,6 +255,7 @@ cp /etc/netctl/examples/ethernet-dhcp /etc/netctl/ethernet-dhcp
 echo "Enable systemd services"
 for srv in acpid avahi-daemon cronie.service cups.service bluetooth.service netctl-ifplugd@eth0.service netctl-auto@wlp2s0.service; do
   systemctl enable $srv
+  systemctl start $srv
 done
 set +e
 systemctl enable --now fstrim.timer
@@ -263,6 +264,7 @@ set -e
 
 if [[ $wm == "i3" ]]; then
   systemctl enable lightdm.service
+  systemctl start lightdm.service
 fi
 
 echo "Install dotfiles for root"
