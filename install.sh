@@ -18,22 +18,27 @@ function aur_helper() {
 }
 
 function bootmethod() {
+  echo ""
   read -p 'Bootmethod: UEFI (1), BIOS (2): ' boot
 }
 
 function config() {
+  echo ""
   read -p 'Configuration: Desktop (1), Laptop (2): ' config
 }
 
 function root_part() {
+  echo ""
   read -p 'Root partition /dev/sdXY :' root_part
 }
 
 function vga() {
+  echo ""
   read -p 'Graphics driver :' vga
 }
 
 function wm() {
+  echo ""
   read -p 'Window manager: i3 (1): ' wm_idx
 }
 
