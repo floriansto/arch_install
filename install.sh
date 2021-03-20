@@ -1,14 +1,16 @@
 #!/bin/bash
 
-base_pkg=(acpid acpilight alsa-utils avahi bluez bluez-utils cifs-utils cups curl dhcpcd dialog dkms git htop ifplugd libinput libreoffice linux-headers man nemo nemo-fileroller nemo-share netctl openssh p7zip pulseaudio pulseaudio-alsa pulsemixer python python-pip qpdfview ranger redshift rsync scrot sshfs sudo terminator thunderbird ttf-dejavu ttf-font-awesome ttf-nerd-fonts-symbols udevil unzip upower vim vivaldi wget wpa_supplicant wqy-zenhei xorg-server zsh)
+base_pkg=(acpid acpilight alsa-utils avahi bluez bluez-utils cifs-utils cups curl dhcpcd dialog dkms git htop ifplugd libinput linux-headers man netctl openssh p7zip pulseaudio pulseaudio-alsa pulsemixer python python-pip ranger redshift rsync scrot sshfs sudo terminator ttf-dejavu ttf-font-awesome ttf-nerd-fonts-symbols udevil unzip upower vim wget wpa_supplicant wqy-zenhei xorg-server zsh)
 
-aur_base=(nextcloud-client spotify)
 
 i3_pkg=(i3lock i3status-rust i3-wm iw lightdm lightdm-gtk-greeter playerctl rofi xss-lock)
 i3_aur=(xidlehook)
 
 laptop_pkg=(xbindkeys xdotool xf86-video-intel)
 laptop_aur=(libinput-gestures)
+
+user_pkg=(firefox gimp gparted gpicview libreoffice nemo nemo-fileroller nemo-share octave qpdfview speedcrunch thunderbird vivaldi vlc)
+user_aur=(bitwarden nextcloud-client plex-media-player spotify teams zoom)
 
 function aur_helper() {
   cd /tmp
@@ -23,35 +25,28 @@ function aur_helper() {
 
 function bootmethod() {
   read -p 'Bootmethod: UEFI (1), BIOS (2): ' boot
-  echo ""
 }
 
 function config() {
   read -p 'Configuration: Desktop (1), Laptop (2): ' config
-  echo ""
 }
 
 function root_part() {
-  read -p 'Root partition /dev/sdXY :' root_part
-  echo ""
+  read -p 'Root partition /dev/sdXY: ' root_part
 }
 
 function vga() {
   read -p 'Graphics driver :' vga
-  echo ""
 }
 
 function wm() {
   read -p 'Window manager: i3 (1): ' wm_idx
-  echo ""
 }
 
 read -p 'Hostname: ' hostname
-echo ""
 read -sp 'Root password: ' root_pw
 echo ""
 read -p 'User: ' user
-echo ""
 read -sp 'Password for flo: ' user_pw
 echo ""
 bootmethod
@@ -149,8 +144,6 @@ sed -i 's/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
 echo "Install aur helper"
 aur_helper
 
-sudo -u $user yay -S ${base_aur[@]}
-
 echo "Intall packages for $wm"
 if [[ $wm == "i3" ]]; then
   pacman -S --noconfirm ${i3_pkg[@]}
@@ -161,6 +154,10 @@ if [[ $config -eq 2 ]]; then
   echo "Start configuration for Laptop"
   pacman -S --noconfirm ${laptop_pkg[@]}
   sudo -u $user yay -S --noconfirm ${laptop_aur[@]}
+
+  sed -i 's/^#HandlePowerKey=poweroff/HandlePowerKey=suspend/g' /etc/systemd/logind.conf
+  sed -i 's/^#HandleSuspendKey=suspend/HandleSuspendKey=suspend/g' /etc/systemd/logind.conf
+  sed -i 's/^#HandleHibernateKey=hibernate/HandleHibernateKey=suspend/g' /etc/systemd/logind.conf
 
   cat <<EOF >/etc/X11/xorg.conf.d/40-libinput.conf
 Section "InputClass"
@@ -202,7 +199,7 @@ action=/etc/acpi/handlers/bl +
 EOF
 
   cat <<EOF >/etc/acpi/events/bl_d
-event=video/brightnessup
+event=video/brightnessdown
 action=/etc/acpi/handlers/bl -
 EOF
 fi
@@ -275,4 +272,8 @@ Section "InputClass"
 EndSection
 EOF
 echo 'KEYMAP=en_US' > /etc/vconsole.conf
+
+echo "Install user packages"
+pacman -S --noconfirm ${user_pkg[@]}
+sudo -u $user yay -S ${user_aur[@]}
 
