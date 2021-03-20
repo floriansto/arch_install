@@ -22,7 +22,7 @@ function aur_helper() {
   git clone https://aur.archlinux.org/yay.git
   chown -R $user:users yay/
   cd yay
-  echo "$user_pw" | sudo -u $user makepkg -si
+  sudo -u $user makepkg -si
 }
 
 function bootmethod() {
