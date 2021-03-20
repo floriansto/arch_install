@@ -1,6 +1,6 @@
 #!/bin/bash
 
-base_pkg=(acpid acpilight alsa-utils avahi bluez bluez-utils cifs-utils cups curl dhcpcd dialog dkms git htop ifplugd libinput libreoffice linux-headers man nemo nemo-fileroller nemo-share netctl openssh p7zip pulseaudio pulseaudio-alsa pulsemixer python python-pip qpdfview ranger redshift rsync scrot sshfs sudo terminator thunderbird ttf-dejavu ttf-font-awesome ttf-nerd-fonts-symbols udevil unzip upower vim vivaldi wget wqy-zenhei xorg-server zsh)
+base_pkg=(acpid acpilight alsa-utils avahi bluez bluez-utils cifs-utils cups curl dhcpcd dialog dkms git htop ifplugd libinput libreoffice linux-headers man nemo nemo-fileroller nemo-share netctl openssh p7zip pulseaudio pulseaudio-alsa pulsemixer python python-pip qpdfview ranger redshift rsync scrot sshfs sudo terminator thunderbird ttf-dejavu ttf-font-awesome ttf-nerd-fonts-symbols udevil unzip upower vim vivaldi wget wpa_supplicant wqy-zenhei xorg-server zsh)
 
 aur_base=(nextcloud-client spotify)
 
