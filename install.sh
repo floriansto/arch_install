@@ -300,9 +300,9 @@ echo "Install user packages"
 $pacmans ${user_pkg[@]}
 sudo -u $user $yays ${user_aur[@]}
 
-if [[ $(which vivialdi-stable) ]]; then
-  /opt/vivaldi-stable/update-ffmpeg
-  /opt/vivaldi-stable/update-widevine
+if [[ -d /opt/vivaldi ]]; then
+  /opt/vivaldi/update-ffmpeg
+  /opt/vivaldi/update-widevine
 fi
 
 echo "Install droidcam"
