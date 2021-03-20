@@ -247,6 +247,10 @@ EOF
 blacklist pcspkr
 EOF
 
+  cat <<EOF >/etc/modprobe.d/audio-fixes.conf
+options snd_hda_intel power_save=0
+EOF
+
 fi
 
 echo "Set xorg power options"
@@ -365,5 +369,4 @@ wget -O droidcam_latest.zip https://files.dev47apps.net/linux/droidcam_1.7.2.zip
 unzip droidcam_latest.zip -d droidcam
 rm droidcam_latest.zip
 cd droidcam && ./install-client
-./install-video
 
