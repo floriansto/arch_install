@@ -1,7 +1,9 @@
 #!/bin/bash
 
-base_pkg=(acpid acpilight alsa-utils avahi bluez bluez-utils cifs-utils cups curl dhcpcd dialog dkms git gvfs-smb htop ifplugd libinput linux-headers man netctl openssh p7zip pulseaudio pulseaudio-alsa pulsemixer python python-pip ranger redshift rsync scrot seahorse sshfs sudo terminator ttf-dejavu ttf-font-awesome ttf-nerd-fonts-symbols udevil unzip upower vim wget wpa_supplicant wqy-zenhei xorg-server xorg-xrandr zsh)
+pacmans="pacman -S --noconfirm"
+yays="yay -S --noconfirm"
 
+base_pkg=(acpid acpilight alsa-utils avahi bluez bluez-utils cifs-utils cups curl dhcpcd dialog dkms git gvfs-smb htop ifplugd libinput linux-headers man netctl openssh p7zip pulseaudio pulseaudio-alsa pulsemixer python python-pip ranger redshift rsync scrot seahorse sshfs sudo terminator ttf-dejavu ttf-font-awesome ttf-nerd-fonts-symbols udevil unzip upower vim wget wpa_supplicant wqy-zenhei xorg-server xorg-xrandr zsh)
 
 i3_pkg=(i3lock i3status-rust i3-wm iw lightdm lightdm-gtk-greeter playerctl rofi xss-lock)
 i3_aur=(autotiling xidlehook)
@@ -22,7 +24,7 @@ function aur_helper() {
   git clone https://aur.archlinux.org/yay.git
   chown -R $user:users yay/
   cd yay
-  sudo -u $user makepkg -si
+  sudo -u $user makepkg -si --noconfirm
 }
 
 function bootmethod() {
@@ -85,7 +87,8 @@ else
 fi
 
 echo "Install base packages"
-pacman -S --noconfirm ${base_pkg[@]}
+$pacmans ${base_pkg[@]}
+$pacmans $vga
 
 echo "$hostname" > /etc/hostname
 
@@ -135,11 +138,17 @@ if [[ $boot -eq 1 ]]; then
 fi
 
 echo "Add user $user"
-useradd -m -g users -s $(which zsh) $user
-(echo "$user_pw"; echo "$user_pw") | passwd $user
-for group in wheel audio video input; do
-  gpasswd -a $user $group
-done
+set +e
+id -u $user
+ret=$?
+set -e
+if [[ $ret -ne 0 ]]; then
+  useradd -m -g users -s $(which zsh) $user
+  (echo "$user_pw"; echo "$user_pw") | passwd $user
+  for group in wheel audio video input; do
+    gpasswd -a $user $group
+  done
+fi
 
 sed -i 's/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
 
@@ -148,14 +157,14 @@ aur_helper
 
 echo "Intall packages for $wm"
 if [[ $wm == "i3" ]]; then
-  pacman -S --noconfirm ${i3_pkg[@]}
-  sudo -u $user yay -S --noconfirm ${i3_aur[@]}
+  $pacmans ${i3_pkg[@]}
+  sudo -u $user $yays ${i3_aur[@]}
 fi
 
 if [[ $config -eq 2 ]]; then
   echo "Start configuration for Laptop"
-  pacman -S --noconfirm ${laptop_pkg[@]}
-  sudo -u $user yay -S --noconfirm ${laptop_aur[@]}
+  $pacmans ${laptop_pkg[@]}
+  sudo -u $user $yays ${laptop_aur[@]}
 
   sed -i 's/^#HandlePowerKey=poweroff/HandlePowerKey=suspend/g' /etc/systemd/logind.conf
   sed -i 's/^#HandleSuspendKey=suspend/HandleSuspendKey=suspend/g' /etc/systemd/logind.conf
@@ -205,7 +214,7 @@ event=video/brightnessdown
 action=/etc/acpi/handlers/bl -
 EOF
 else
-  sudo -u $user yay -S --noconfirm ${desktop_aur[@]}
+  sudo -u $user $yays ${desktop_aur[@]}
 fi
 
 echo "Set xorg power options"
@@ -278,8 +287,8 @@ EOF
 echo 'KEYMAP=en_US' > /etc/vconsole.conf
 
 echo "Install user packages"
-pacman -S --noconfirm ${user_pkg[@]}
-sudo -u $user yay -S ${user_aur[@]}
+$pacmans ${user_pkg[@]}
+sudo -u $user $yays ${user_aur[@]}
 
 if [[ $(which vivialdi-stable) ]]; then
   /opt/vivaldi-stable/update-ffmpeg
