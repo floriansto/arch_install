@@ -15,7 +15,7 @@ function aur_helper() {
   git clone https://aur.archlinux.org/yay.git
   chown -R $user:users yay/
   cd yay
-  sudo -u $user makepkg -si
+  echo "$user_pw" | sudo -u $user makepkg -si
 }
 
 function bootmethod() {
@@ -159,7 +159,7 @@ if [[ $config -eq 2 ]]; then
   pacman -S --noconfirm ${laptop_pkg[@]}
   sudo -u $user yay -S --noconfirm ${laptop_aur[@]}
 
-  cat <<EOF >>/etc/X11/xorg.conf.d/40-libinput.conf
+  cat <<EOF >/etc/X11/xorg.conf.d/40-libinput.conf
 Section "InputClass"
   Identifier "/dev/input/event6"
   MatchIsTouchpad "on"
@@ -171,14 +171,17 @@ Section "InputClass"
 EndSection
 EOF
 
-  cat <<EOF >>/etc/udev/rules.d/backlight.rules
+  cat <<EOF >/etc/udev/rules.d/backlight.rules
 ACTION=="add", SUBSYSTEM=="backlight", KERNEL=="intel_backlight", GROUP="video", MODE="0664"
 EOF
-  cat <<EOF >>/etc/udev/rules.d/99-lowbat.rules
+  cat <<EOF >/etc/udev/rules.d/99-lowbat.rules
 SUBSYSTEM=="power_supply", ATTR{status}=="Discharging", ATTR{capacity}=="[0-5]", RUN+="/usr/bin/systemctl suspend"
 EOF
 
-  cat <<EOF >>/etc/acpi/handlers/bl
+  if [[ ! -d /etc/acpi/handlers ]]; then
+    mkdir -p /etc/acpi/handlers
+  fi
+  cat <<EOF >/etc/acpi/handlers/bl
 #!/bin/sh
 step=5
 
@@ -190,19 +193,19 @@ esac
 EOF
   chmod 755 /etc/acpi/handlers/bl
 
-  cat <<EOF >>/etc/acpi/events/bl_u
+  cat <<EOF >/etc/acpi/events/bl_u
 event=video/brightnessup
 action=/etc/acpi/handlers/bl +
 EOF
 
-  cat <<EOF >>/etc/acpi/events/bl_d
+  cat <<EOF >/etc/acpi/events/bl_d
 event=video/brightnessup
 action=/etc/acpi/handlers/bl -
 EOF
 fi
 
 echo "Set xorg power options"
-cat <<EOF >>/etc/xorg.conf.d/10-disable-xorg-power-options.conf
+cat <<EOF >/etc/xorg.conf.d/10-disable-xorg-power-options.conf
 Section "Monitor"
   Identifier "Monitor1"
   Option "DPMS" "false"
@@ -213,7 +216,7 @@ Section "ServerFlags"
 EndSection
 EOF
 
-cat <<EOF >>/etc/acpi/events/powerbtn
+cat <<EOF >/etc/acpi/events/powerbtn
 event=button/power
 action=/usr/bin/i3lock && sleep 1 && /usr/bin/systemctl suspend
 EOF
@@ -254,9 +257,13 @@ sudo -u $user git clone https://github.com/floriansto/dotfiles.git
 sudo -u $user ./dotfiles/install.sh noconfirm
 
 echo "Set keymap"
-
-
-sudo -u $user localectl set-x11-keymap us "" intl
+cat <<EOF >/etc/X11/xorg.conf.d/00-keyboard.conf
+Section "InputClass"
+    Identifier "system-keyboard"
+    MatchIsKeyboard "on"
+    Option "XkbLayout" "us"
+    Option "XkbVariant" "ïntl"
+EndSection
+EOF
 echo 'KEYMAP=en_US' > /etc/vconsole.conf
-
 
