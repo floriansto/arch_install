@@ -12,6 +12,9 @@ laptop_aur=(libinput-gestures)
 
 function aur_helper() {
   cd /tmp
+  if [[ -d yay ]]; then
+    rm -rf yay
+  fi
   git clone https://aur.archlinux.org/yay.git
   chown -R $user:users yay/
   cd yay
