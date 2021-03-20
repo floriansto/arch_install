@@ -20,7 +20,7 @@ user_pkg=(firefox gimp gparted gpicview libreoffice nemo nemo-fileroller nemo-sh
 user_aur=(bitwarden nextcloud-client plex-media-player spotify teams zoom)
 
 function error_exit() {
-  echo "Errorcod $2 in line $1"
+  echo "Errorcode $2 in line $1"
 }
 
 function aur_helper() {
@@ -256,8 +256,10 @@ done
 #for usr_srv in pulseaudio.service pulseaudio.socket; do
   #sudo -u $user systemctl --user enable $usr_srv
 #done
+set +e
 systemctl enable --now fstrim.timer
 systemctl enable --now systemd-timesycd.service
+set -e
 
 if [[ $wm == "i3" ]]; then
   systemctl enable lightdm.service
