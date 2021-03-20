@@ -253,9 +253,9 @@ echo "Enable systemd services"
 for srv in acpid avahi-daemon cups.service bluetooth.service netctl-ifplugd@eth0.service netctl-auto@wlp2s0.service; do
   systemctl enable $srv
 done
-for usr_srv in pulseaudio.service pulseaudio.socket; do
-  sudo -u $user systemctl enable $usr_srv
-done
+#for usr_srv in pulseaudio.service pulseaudio.socket; do
+  #sudo -u $user systemctl --user enable $usr_srv
+#done
 systemctl enable --now fstrim.timer
 systemctl enable --now systemd-timesycd.service
 
