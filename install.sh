@@ -1,7 +1,9 @@
 #!/bin/bash
 
-pacmans="pacman -S --noconfirm"
-yays="yay -S --noconfirm"
+set -e
+
+pacmans="pacman -S --noconfirm --needed"
+yays="yay -S --noconfirm --needed"
 
 base_pkg=(acpid acpilight alsa-utils avahi bluez bluez-utils cifs-utils cups curl dhcpcd dialog dkms git gvfs-smb htop ifplugd libinput linux-headers man netctl openssh p7zip pulseaudio pulseaudio-alsa pulsemixer python python-pip ranger redshift rsync scrot seahorse sshfs sudo terminator ttf-dejavu ttf-font-awesome ttf-nerd-fonts-symbols udevil unzip upower vim wget wpa_supplicant wqy-zenhei xorg-server xorg-xrandr zsh)
 
