@@ -17,7 +17,7 @@ laptop_aur=(libinput-gestures)
 desktop_aur=(rtl8814au-aircrack-dkms-git)
 
 user_pkg=(firefox gimp gparted gpicview libreoffice nemo nemo-fileroller nemo-share octave qpdfview speedcrunch thunderbird vivaldi vlc)
-user_aur=(bitwarden nextcloud-client plex-media-player spotify teams zoom)
+user_aur=(bitwarden-bin nextcloud-client plex-media-player spotify teams zoom)
 
 function error_exit() {
   echo "Errorcode $2 in line $1"
