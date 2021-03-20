@@ -6,7 +6,7 @@ trap 'error_exit $LINENO $?' ERR SIGTERM SIGINT
 pacmans="pacman -S --noconfirm --needed"
 yays="yay -S --noconfirm --needed"
 
-base_pkg=(acpid acpilight alsa-utils avahi bluez bluez-utils cifs-utils cups curl dhcpcd dialog dkms git gvfs-smb htop ifplugd libinput linux-headers man netctl openssh p7zip pulseaudio pulseaudio-alsa pulsemixer python python-pip ranger redshift rsync scrot seahorse sshfs sudo terminator ttf-dejavu ttf-font-awesome ttf-nerd-fonts-symbols udevil unzip upower vim wget wpa_supplicant wqy-zenhei xorg-server xorg-xrandr zsh)
+base_pkg=(acpid acpilight alsa-utils avahi bluez bluez-utils cifs-utils cron cups curl dhcpcd dialog dkms git gvfs-smb htop ifplugd libinput linux-headers man netctl openssh p7zip pulseaudio pulseaudio-alsa pulsemixer python python-pip ranger redshift rsync scrot seahorse sshfs sudo terminator ttf-dejavu ttf-font-awesome ttf-nerd-fonts-symbols udevil unzip upower vim wget wpa_supplicant wqy-zenhei xorg-server xorg-xrandr zsh)
 
 i3_pkg=(i3lock i3status-rust i3-wm iw lightdm lightdm-gtk-greeter playerctl rofi xss-lock)
 i3_aur=(autotiling xidlehook)
@@ -16,7 +16,7 @@ laptop_aur=(libinput-gestures)
 
 desktop_aur=(rtl8814au-aircrack-dkms-git)
 
-user_pkg=(firefox gimp gparted gpicview libreoffice nemo nemo-fileroller nemo-share octave qpdfview speedcrunch thunderbird vivaldi vlc)
+user_pkg=(file-roller firefox gimp gparted gpicview libreoffice octave qpdfview speedcrunch thunar thunar-volman thunar-archive-plugin thunderbird vivaldi vlc zip)
 user_aur=(bitwarden-bin nextcloud-client plex-media-player spotify teams zoom)
 
 function error_exit() {
@@ -157,6 +157,9 @@ if [[ $ret -ne 0 ]]; then
   done
 fi
 
+echo "Set zsh for root"
+chsh -s $(which zsh)
+
 sed -i 's/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
 
 echo "Install aur helper"
@@ -250,12 +253,9 @@ cp /etc/netctl/examples/wireless-wpa /etc/netctl/wireless-wpa
 cp /etc/netctl/examples/ethernet-dhcp /etc/netctl/ethernet-dhcp
 
 echo "Enable systemd services"
-for srv in acpid avahi-daemon cups.service bluetooth.service netctl-ifplugd@eth0.service netctl-auto@wlp2s0.service; do
+for srv in acpid avahi-daemon cronie.service cups.service bluetooth.service netctl-ifplugd@eth0.service netctl-auto@wlp2s0.service; do
   systemctl enable $srv
 done
-#for usr_srv in pulseaudio.service pulseaudio.socket; do
-  #sudo -u $user systemctl --user enable $usr_srv
-#done
 set +e
 systemctl enable --now fstrim.timer
 systemctl enable --now systemd-timesycd.service
@@ -295,6 +295,18 @@ Section "InputClass"
 EndSection
 EOF
 echo 'KEYMAP=en_US' > /etc/vconsole.conf
+
+echo "smb fixes"
+if [[ ! -d /etc/samba ]]; then
+  mkdir /etc/samba
+fi
+cat <<EOF >/etc/samba/smb.conf
+[global]
+    client min protocol = SMB3
+EOF
+cat <<EOF >/var/spool/cron/root
+@reboot killall gvfsd-smb-browse
+EOF
 
 echo "Install user packages"
 $pacmans ${user_pkg[@]}
