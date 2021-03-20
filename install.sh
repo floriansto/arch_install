@@ -141,12 +141,12 @@ sed -i 's/^# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
 echo "Install aur helper"
 aur_helper
 
-sudo -u $user yay -S $base_aur
+sudo -u $user yay -S ${base_aur[@]}
 
 echo "Intall packages for $wm"
 if [[ $wm == "i3" ]]; then
-  pacman -S $i3_pkg
-  sudo -u $user yay -S $i3_aur
+  pacman -S ${i3_pkg[@]}
+  sudo -u $user yay -S ${i3_aur[@]}
 fi
 
 echo "Set keymap"
@@ -155,8 +155,8 @@ echo 'KEYMAP=en_US' > /etc/vconsole.conf
 
 if [[ $config -eq 2 ]]; then
   echo "Start configuration for Laptop"
-  pacman -S $laptop_pkg
-  sudo -u $user yay -S $laptop_aur
+  pacman -S ${laptop_pkg[@]}
+  sudo -u $user yay -S ${laptop_aur[@]}
 
   cat <<EOF >>/etc/X11/xorg.conf.d/40-libinput.conf
 Section "InputClass"
