@@ -1,10 +1,10 @@
 #!/bin/bash
 
-base_pkg=(acpid acpilight alsa-utils avahi bluez bluez-utils cifs-utils cups curl dhcpcd dialog dkms git htop ifplugd libinput linux-headers man netctl openssh p7zip pulseaudio pulseaudio-alsa pulsemixer python python-pip ranger redshift rsync scrot sshfs sudo terminator ttf-dejavu ttf-font-awesome ttf-nerd-fonts-symbols udevil unzip upower vim wget wpa_supplicant wqy-zenhei xorg-server zsh)
+base_pkg=(acpid acpilight alsa-utils avahi bluez bluez-utils cifs-utils cups curl dhcpcd dialog dkms git gvfs-smb htop ifplugd libinput linux-headers man netctl openssh p7zip pulseaudio pulseaudio-alsa pulsemixer python python-pip ranger redshift rsync scrot seahorse sshfs sudo terminator ttf-dejavu ttf-font-awesome ttf-nerd-fonts-symbols udevil unzip upower vim wget wpa_supplicant wqy-zenhei xorg-server xorg-xrandr zsh)
 
 
 i3_pkg=(i3lock i3status-rust i3-wm iw lightdm lightdm-gtk-greeter playerctl rofi xss-lock)
-i3_aur=(xidlehook)
+i3_aur=(autotiling xidlehook)
 
 laptop_pkg=(xbindkeys xdotool xf86-video-intel)
 laptop_aur=(libinput-gestures)
