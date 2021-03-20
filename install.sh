@@ -14,9 +14,9 @@ i3_aur=(autotiling xidlehook)
 laptop_pkg=(xbindkeys xdotool xf86-video-intel)
 laptop_aur=(libinput-gestures)
 
-desktop_aur=(rtl8814au-aircrack-dkms-git)
+desktop_aur=(amdgpu-fan obinskit rtl8814au-aircrack-dkms-git)
 
-user_pkg=(file-roller firefox gimp gparted gpicview libreoffice octave qpdfview speedcrunch thunar thunar-volman thunar-archive-plugin thunderbird vivaldi vlc zip)
+user_pkg=(file-roller firefox gimp gparted gpicview libreoffice lm_sensors octave qpdfview speedcrunch thunar thunar-volman thunar-archive-plugin thunderbird vivaldi vlc zip)
 user_aur=(bitwarden-bin nextcloud-client plex-media-player spotify teams zoom)
 
 function error_exit() {
@@ -223,8 +223,30 @@ EOF
 event=video/brightnessdown
 action=/etc/acpi/handlers/bl -
 EOF
+
 else
+
   sudo -u $user $yays ${desktop_aur[@]}
+  cat <<EOF >/etc/amdgpu-fan.yml
+# /etc/amdgpu-fan.yml
+# eg:
+
+speed_matrix:  # -[temp(*C), speed(0-100%)]
+- [0, 0]
+- [65, 0]
+- [80, 75]
+- [90, 100]
+
+# optional
+# cards:  # can be any card returned from
+#         # ls /sys/class/drm | grep "^card[[:digit:]]$"
+# - card0
+EOF
+
+  cat <<EOF >/etc/modprobe.d/nobeep.conf
+blacklist pcspkr
+EOF
+
 fi
 
 echo "Set xorg power options"
@@ -318,6 +340,23 @@ if [[ -d /opt/vivaldi ]]; then
   /opt/vivaldi/update-ffmpeg
   /opt/vivaldi/update-widevine
 fi
+
+echo "Clone linux scripts"
+cd /opt
+git clone https://github.com/floriansto/scripts_linux.git
+chown -R $user:users scripts_linux
+cat <<EOF >>/var/spool/cron/root
+*/30 * * * * /opt/scripts_linux/startBackup.sh $hostname 5176 > /dev/null 2>&1
+EOF
+cat <<EOF >/var/spool/cron/$user
+0 */2 * * * /opt/scripts_linux/backupPacman.sh > /dev/null
+EOF
+
+echo "Setup ssh"
+ssh=/etc/ssh/sshd_config
+sed -i 's/^#Port 22/Port 5176/' $ssh
+sed -i 's/^#PermitRootLogin prohibit-password/PermitRootLogin prohibit-password/' $ssh
+sed -i 's/^#PubkeyAuthentication yes/PubkeyAuthentication yes/' $ssh
 
 echo "Install droidcam"
 cd /tmp
