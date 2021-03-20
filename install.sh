@@ -220,7 +220,7 @@ else
 fi
 
 echo "Set xorg power options"
-cat <<EOF >/etc/xorg.conf.d/10-disable-xorg-power-options.conf
+cat <<EOF >/etc/X11/xorg.conf.d/10-disable-xorg-power-options.conf
 Section "Monitor"
   Identifier "Monitor1"
   Option "DPMS" "false"
