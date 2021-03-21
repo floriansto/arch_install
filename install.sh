@@ -176,10 +176,6 @@ if [[ $config -eq 2 ]]; then
   $pacmans ${laptop_pkg[@]}
   sudo -u $user $yays ${laptop_aur[@]}
 
-  sed -i 's/^#HandlePowerKey=poweroff/HandlePowerKey=suspend/g' /etc/systemd/logind.conf
-  sed -i 's/^#HandleSuspendKey=suspend/HandleSuspendKey=suspend/g' /etc/systemd/logind.conf
-  sed -i 's/^#HandleHibernateKey=hibernate/HandleHibernateKey=suspend/g' /etc/systemd/logind.conf
-
   cat <<EOF >/etc/X11/xorg.conf.d/40-libinput.conf
 Section "InputClass"
   Identifier "/dev/input/event6"
@@ -272,6 +268,10 @@ EOF
   systemctl enable netctl-auto@wlp6s0u2.service
 
 fi
+
+sed -i 's/^#HandlePowerKey=poweroff/HandlePowerKey=suspend/g' /etc/systemd/logind.conf
+sed -i 's/^#HandleSuspendKey=suspend/HandleSuspendKey=suspend/g' /etc/systemd/logind.conf
+sed -i 's/^#HandleHibernateKey=hibernate/HandleHibernateKey=suspend/g' /etc/systemd/logind.conf
 
 echo "Set xorg power options"
 cat <<EOF >/etc/X11/xorg.conf.d/10-disable-xorg-power-options.conf
