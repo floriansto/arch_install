@@ -328,9 +328,9 @@ if [[ -d dotfiles ]];then
 fi
 sudo -u $user git clone https://github.com/floriansto/dotfiles.git
 if [[ $config -eq 1 ]]; then
-  sudo -u $user ./dotfiles/install.sh -v standard -e backlight -e battery
+  sudo -u $user ./dotfiles/install.sh -v standard -e backlight -e battery -g -dw wlp6s0u2 -de enp4s0
 else
-  sudo -u $user ./dotfiles/install.sh -v standard
+  sudo -u $user ./dotfiles/install.sh -v standard -g -dw wlp2s0 -de enp4s0
 fi
 
 echo "Set keymap"
