@@ -315,7 +315,7 @@ if [[ -d dotfiles ]];then
   rm -rf dotfiles
 fi
 git clone https://github.com/floriansto/dotfiles.git
-./dotfiles/install.sh noconfirm
+./dotfiles/install.sh
 
 echo "Install dotfiles for $user"
 cd /home/$user
@@ -327,7 +327,11 @@ if [[ -d dotfiles ]];then
   rm -rf dotfiles
 fi
 sudo -u $user git clone https://github.com/floriansto/dotfiles.git
-sudo -u $user ./dotfiles/install.sh noconfirm
+if [[ $config -eq 1 ]]; then
+  sudo -u $user ./dotfiles/install.sh -v standard -e backlight -e battery
+else
+  sudo -u $user ./dotfiles/install.sh -v standard
+fi
 
 echo "Set keymap"
 cat <<EOF >/etc/X11/xorg.conf.d/00-keyboard.conf
