@@ -11,7 +11,7 @@ base_pkg=(acpid acpilight alsa-utils avahi bluez bluez-utils cifs-utils cron cup
 i3_pkg=(dunst i3lock i3status-rust i3-wm iw lightdm lightdm-gtk-greeter playerctl rofi xss-lock)
 i3_aur=(autotiling xidlehook)
 
-laptop_pkg=(xbindkeys xdotool xf86-video-intel)
+laptop_pkg=(xbindkeys xdotool)
 laptop_aur=(libinput-gestures)
 
 desktop_aur=(amdgpu-fan obinskit rtl8814au-aircrack-dkms-git)
@@ -35,7 +35,7 @@ function aur_helper() {
 }
 
 function bootmethod() {
-  read -p 'Bootmethod: UEFI (1), BIOS (2): ' boot
+  read -p 'Bootmethod: UEFI (1): ' boot
 }
 
 function config() {
@@ -51,7 +51,7 @@ function vga() {
 }
 
 function wm() {
-  read -p 'Window manager: i3 (1): ' wm_idx
+  read -p 'Window , BIOS (2)manager: i3 (1): ' wm_idx
 }
 
 read -p 'Hostname: ' hostname
@@ -65,7 +65,7 @@ while [[ $boot != "1" && $boot != "2" ]]; do
   bootmethod
 done
 config
-while [[ $config != "1" && $config != "2" ]]; do
+while [[ $config != "1" ]]; do
   config
 done
 root_part
@@ -228,8 +228,10 @@ IP=dhcp
 EOF
   systemctl enable netctl-ifplugd@enp4s0.service
   systemctl enable netctl-auto@wlp2s0.service
-  p
-else
+
+fi
+
+if [[ $config -eq 1 ]]; then
 
   sudo -u $user $yays ${desktop_aur[@]}
   cat <<EOF >/etc/amdgpu-fan.yml
