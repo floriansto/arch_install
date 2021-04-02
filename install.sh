@@ -16,7 +16,7 @@ laptop_aur=(libinput-gestures)
 
 desktop_aur=(amdgpu-fan obinskit rtl8814au-aircrack-dkms-git rtl8761b-fw)
 
-user_pkg=(feh file-roller firefox gimp gparted gpicview libreoffice lm_sensors octave qpdfview speedcrunch thunar thunar-volman thunar-archive-plugin thunderbird vivaldi vlc zip)
+user_pkg=(ctags feh file-roller firefox gimp gparted gpicview libreoffice lm_sensors octave qpdfview speedcrunch thunar thunar-volman thunar-archive-plugin thunderbird vivaldi vlc zip)
 user_aur=(bitwarden-bin nextcloud-client plex-media-player spotify teams zoom)
 
 function error_exit() {
