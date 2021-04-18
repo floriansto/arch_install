@@ -292,6 +292,19 @@ event=button/power
 action=/usr/bin/i3lock && sleep 1 && /usr/bin/systemctl suspend
 EOF
 
+cat <<EOF >/usr/share/applications/vim-term.desktop
+[Desktop Entry]
+Encoding=UTF-8
+Type=Application
+NoDisplay=true
+Name=vim-term
+Exec=i3-sensible-terminal -e 'vim %F'
+Keywords=Text;editor;
+Icon=gvim
+Categories=Utility;TextEditor;
+MimeType=text/english;text/plain;text/x-makefile;text/x-c++hdr;text/x-c++src;text/x-chdr;text/x-csrc;text/x-java;text/x-moc;text/x-pascal;text/x-tcl;text/x-tex;application/x-shellscript;text/x-c;text/x-c++;
+EOF
+
 echo "Setup udevil"
 line_no=$(grep -noe ^allowed_types /etc/udevil/udevil.conf | cut -f1 -d:)
 sed -i "${line_no}s/$/, cifs/" /etc/udevil/udevil.conf
