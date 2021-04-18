@@ -58,7 +58,7 @@ Special configuration for the desktop
 * Fixes for audio noise
 
 ## AUR helper
-As AUR helper `yay` is installed.
+As AUR helper `paru` is installed.
 
 ## Droidcam
 Droidcam is installed using their installation instructions
