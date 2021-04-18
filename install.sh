@@ -4,7 +4,7 @@ set -e
 trap 'error_exit $LINENO $?' ERR SIGTERM SIGINT
 
 pacmans="pacman -S --noconfirm --needed"
-yays="yay -S --noconfirm --needed"
+aur="paru -S --noconfirm --needed"
 
 base_pkg=(acpid acpilight alsa-utils avahi bat bluez bluez-utils cifs-utils cron cups curl dhcpcd dialog dkms git gvfs-smb htop ifplugd libinput linux-headers man netctl noto-fonts-emoji openssh p7zip pipewire-pulse pulseaudio-alsa pulsemixer python python-pip ranger redshift rsync scrot seahorse sshfs sudo terminator ttf-dejavu ttf-font-awesome ttf-nerd-fonts-symbols udevil unzip upower vim wget wpa_supplicant wqy-zenhei xorg-server xorg-xrandr zsh)
 
@@ -25,12 +25,12 @@ function error_exit() {
 
 function aur_helper() {
   cd /tmp
-  if [[ -d yay ]]; then
-    rm -rf yay
+  if [[ -d paru ]]; then
+    rm -rf paru
   fi
-  git clone https://aur.archlinux.org/yay.git
-  chown -R $user:users yay/
-  cd yay
+  git clone https://aur.archlinux.org/paru.git
+  chown -R $user:users paru/
+  cd paru
   sudo -u $user makepkg -si --noconfirm
 }
 
@@ -168,13 +168,13 @@ aur_helper
 echo "Intall packages for $wm"
 if [[ $wm == "i3" ]]; then
   $pacmans ${i3_pkg[@]}
-  sudo -u $user $yays ${i3_aur[@]}
+  sudo -u $user $aur ${i3_aur[@]}
 fi
 
 if [[ $config -eq 2 ]]; then
   echo "Start configuration for Laptop"
   $pacmans ${laptop_pkg[@]}
-  sudo -u $user $yays ${laptop_aur[@]}
+  sudo -u $user $aur ${laptop_aur[@]}
 
   cat <<EOF >/etc/X11/xorg.conf.d/40-libinput.conf
 Section "InputClass"
@@ -233,7 +233,7 @@ fi
 
 if [[ $config -eq 1 ]]; then
 
-  sudo -u $user $yays ${desktop_aur[@]}
+  sudo -u $user $aur ${desktop_aur[@]}
   cat <<EOF >/etc/amdgpu-fan.yml
 # /etc/amdgpu-fan.yml
 # eg:
@@ -363,7 +363,7 @@ EOF
 
 echo "Install user packages"
 $pacmans ${user_pkg[@]}
-sudo -u $user $yays ${user_aur[@]}
+sudo -u $user $aur ${user_aur[@]}
 
 if [[ -d /opt/vivaldi ]]; then
   /opt/vivaldi/update-ffmpeg
