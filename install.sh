@@ -6,7 +6,7 @@ trap 'error_exit $LINENO $?' ERR SIGTERM SIGINT
 pacmans="pacman -S --noconfirm --needed"
 aur="paru -S --noconfirm --needed"
 
-base_pkg=(acpid acpilight alsa-utils avahi bat bluez bluez-utils cifs-utils cron cups curl dhcpcd dialog dkms efibootmgr git gvfs-smb htop ifplugd libinput linux-headers man netctl noto-fonts-emoji openssh p7zip pipewire-pulse pulseaudio-alsa pulsemixer python python-pip ranger redshift rsync scrot seahorse sshfs sudo terminator ttf-dejavu ttf-font-awesome ttf-nerd-fonts-symbols udevil unzip upower vim wget wpa_supplicant wqy-zenhei xorg-server xorg-xrandr zsh)
+base_pkg=(acpid acpilight alsa-utils avahi bat bluez bluez-utils cifs-utils cron cups curl dhcpcd dialog dkms efibootmgr git gvfs-smb htop ifplugd libinput linux-headers man netctl noto-fonts-emoji ntp openssh p7zip pipewire-pulse pulseaudio-alsa pulsemixer python python-pip ranger redshift rsync scrot seahorse sshfs sudo terminator ttf-dejavu ttf-font-awesome ttf-nerd-fonts-symbols udevil unzip upower vim wget wpa_supplicant wqy-zenhei xorg-server xorg-xrandr zsh)
 
 i3_pkg=(arandr dunst i3lock i3status-rust i3-wm iw lightdm lightdm-gtk-greeter playerctl rofi xss-lock)
 i3_aur=(autotiling xidlehook)
@@ -96,6 +96,9 @@ fi
 echo "Install base packages"
 $pacmans ${base_pkg[@]}
 $pacmans $vga
+
+echo "Enable time synchronization"
+timedatectl set-ntp on
 
 echo "$hostname" > /etc/hostname
 
