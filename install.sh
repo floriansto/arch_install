@@ -6,18 +6,30 @@ trap 'error_exit $LINENO $?' ERR SIGTERM SIGINT
 pacmans="pacman -S --noconfirm --needed"
 aur="paru -S --noconfirm --needed"
 
-base_pkg=(acpid acpilight alsa-utils avahi bat bluez bluez-utils cifs-utils cron cups curl dhcpcd dialog dkms efibootmgr git gvfs-smb htop ifplugd libinput linux-headers man netctl noto-fonts-emoji ntp openssh p7zip pipewire-pulse pulseaudio-alsa pulsemixer python python-pip ranger redshift rsync scrot seahorse sshfs sudo terminator ttf-dejavu ttf-font-awesome ttf-nerd-fonts-symbols udevil unzip upower vim wget wpa_supplicant wqy-zenhei xorg-server xorg-xrandr zsh)
+base_pkg=(acpid acpilight alsa-utils avahi bat bluez bluez-utils cifs-utils cron cups curl dhcpcd dialog dkms efibootmgr git gvfs-smb htop ifplugd jq libinput linux-headers man netctl noto-fonts-emoji ntp openssh p7zip pipewire-pulse pulseaudio-alsa pulsemixer python python-pip ranger rsync scrot seahorse sshfs sudo terminator ttf-dejavu ttf-font-awesome ttf-nerd-fonts-symbols udevil unzip upower vim wget wpa_supplicant wqy-zenhei zsh)
+
+x11_pkg=(feh redshift xorg-server xorg-xrandr)
+x11_aur=()
+wayland_pkg=(wayland wayland-protocols wlroots)
+wayland_aur=(redshift-wayland-git)
 
 i3_pkg=(arandr dunst i3lock i3status-rust i3-wm iw lightdm lightdm-gtk-greeter playerctl rofi xss-lock)
 i3_aur=(autotiling xidlehook)
+i3_greeter=lightdm
+
+sway_pkg=(sway swaybg wofi)
+sway_aur=(greetd greetd-gtkgreet)
+sway_greeter=greetd
 
 laptop_pkg=(xbindkeys xdotool)
 laptop_aur=(libinput-gestures)
 
 desktop_aur=(amdgpu-fan obinskit rtl8814au-aircrack-dkms-git rtl8761b-fw)
 
-user_pkg=(ctags feh file-roller firefox gimp gparted gpicview gvfs-mtp gvfs-gphoto2 libreoffice lm_sensors octave qpdfview speedcrunch thunar thunar-volman thunar-archive-plugin thunderbird vivaldi vlc xfce4-settings zip)
-user_aur=(bitwarden-bin nextcloud-client plex-media-player spotify teams zoom)
+user_pkg=(ctags feh file-roller firefox gimp gparted gpicview gvfs-mtp gvfs-gphoto2 libreoffice lm_sensors octave qpdfview speedcrunch thunar thunar-volman thunar-archive-plugin thunderbird tumbler vivaldi vlc xfce4-settings zip)
+user_aur=(bitwarden-bin nextcloud-client plex-media-player spotify teams zoom ncspot)
+
+is_x11=0
 
 function error_exit() {
   echo "Errorcode $2 in line $1"
@@ -51,7 +63,7 @@ function vga() {
 }
 
 function wm() {
-  read -p 'Window , BIOS (2)manager: i3 (1): ' wm_idx
+  read -p 'Windowmanager: i3 (1), sway(2): ' wm_idx
 }
 
 read -p 'Hostname: ' hostname
@@ -73,11 +85,20 @@ while [[ ! -e $root_part ]]; do
   root_part
 done
 wm
-while [[ $wm_idx != "1" ]]; do
+while [[ $wm_idx != "1"  || $wm_idx != "2" ]]; do
   wm
 done
 if [[ $wm_idx -eq 1 ]]; then
+  wm_pkg=($i3_pkg $x11_pkg)
+  wm_aur=($i3_aur $x11_aur)
+  is_x11=1
+  greeter=$i3_greeter
   wm='i3'
+elif [[ $wm_idx -eq 2 ]]; then
+  wm_pkg=($sway_pkg $wayland_pkg)
+  wm_aur=($sway_aur $wayland_aur)
+  greeter=$sway_greeter
+  wm='sway'
 fi
 
 if [[ $(lspci | grep VGA | grep -i intel | wc -l) -gt 0 ]]; then
@@ -169,17 +190,16 @@ echo "Install aur helper"
 aur_helper
 
 echo "Intall packages for $wm"
-if [[ $wm == "i3" ]]; then
-  $pacmans ${i3_pkg[@]}
-  sudo -u $user $aur ${i3_aur[@]}
-fi
+$pacmans ${wm_pkg[@]}
+sudo -u $user $aur ${wm_aur[@]}
 
 if [[ $config -eq 2 ]]; then
   echo "Start configuration for Laptop"
   $pacmans ${laptop_pkg[@]}
   sudo -u $user $aur ${laptop_aur[@]}
 
-  cat <<EOF >/etc/X11/xorg.conf.d/40-libinput.conf
+  if [[ $is_x11 -eq 1 ]]; then
+    cat <<EOF >/etc/X11/xorg.conf.d/40-libinput.conf
 Section "InputClass"
   Identifier "/dev/input/event6"
   MatchIsTouchpad "on"
@@ -190,6 +210,7 @@ Section "InputClass"
   Option "ClickMethod" "clickfinger"
 EndSection
 EOF
+  fi
 
   cat <<EOF >/etc/udev/rules.d/backlight.rules
 ACTION=="add", SUBSYSTEM=="backlight", KERNEL=="intel_backlight", GROUP="video", MODE="0664"
@@ -278,8 +299,9 @@ sed -i 's/^#HandlePowerKey=poweroff/HandlePowerKey=suspend/g' /etc/systemd/login
 sed -i 's/^#HandleSuspendKey=suspend/HandleSuspendKey=suspend/g' /etc/systemd/logind.conf
 sed -i 's/^#HandleHibernateKey=hibernate/HandleHibernateKey=suspend/g' /etc/systemd/logind.conf
 
-echo "Set xorg power options"
-cat <<EOF >/etc/X11/xorg.conf.d/10-disable-xorg-power-options.conf
+if [[ $is_x11 -eq 1 ]]; then
+  echo "Set xorg power options"
+  cat <<EOF >/etc/X11/xorg.conf.d/10-disable-xorg-power-options.conf
 Section "Monitor"
   Identifier "Monitor1"
   Option "DPMS" "false"
@@ -289,6 +311,7 @@ Section "ServerFlags"
   Option "BlankTime" "0"
 EndSection
 EOF
+fi
 
 cat <<EOF >/etc/acpi/events/powerbtn
 event=button/power
@@ -322,10 +345,19 @@ systemctl enable --now fstrim.timer
 systemctl enable --now systemd-timesycd.service
 set -e
 
-if [[ $wm == "i3" ]]; then
-  systemctl enable lightdm.service
-  systemctl start lightdm.service
+echo "Setup $greeter greeter"
+if [[ $wm == "sway" ]]; then
+  cat <<EOF >/etc/greetd/config.toml
+[terminal]
+vt = 1
+
+[default_session]
+command = "agreety --cmd sway"
+user = "greeter"
+EOF
 fi
+systemctl enable $greeter.service
+systemctl start $greeter.service
 
 echo "Install dotfiles for root"
 cd /root
