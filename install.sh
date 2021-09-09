@@ -17,8 +17,8 @@ i3_pkg=(arandr dunst feh i3lock i3status-rust i3-wm iw lightdm lightdm-gtk-greet
 i3_aur=(autotiling xidlehook)
 i3_greeter=lightdm
 
-sway_pkg=(sway swaybg wofi)
-sway_aur=(greetd greetd-gtkgreet)
+sway_pkg=(sway swaybg swayidle swaylock wofi)
+sway_aur=(greetd greetd-gtkgreet sway-audio-idle-inhibit-git)
 sway_greeter=greetd
 
 laptop_pkg=(xbindkeys xdotool)
