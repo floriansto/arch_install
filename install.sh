@@ -6,20 +6,18 @@ trap 'error_exit $LINENO $?' ERR SIGTERM SIGINT
 pacmans="pacman -S --noconfirm --needed"
 aur="paru -S --noconfirm --needed"
 
-base_pkg=(acpid acpilight alacritty alsa-utils avahi bat bluez bluez-utils cifs-utils cron cups curl dhcpcd dialog dkms efibootmgr git gvfs-smb htop ifplugd jq libinput linux-headers man netctl noto-fonts-emoji ntp openssh p7zip pipewire-pulse pulseaudio-alsa pulsemixer python python-pip ranger rsync scrot seahorse sshfs sudo ttf-dejavu ttf-font-awesome ttf-nerd-fonts-symbols udevil unzip upower vim wget wpa_supplicant wqy-zenhei zsh)
+base_pkg=(acpid acpilight alacritty alsa-utils avahi bat bluez bluez-utils cifs-utils cron cups curl dhcpcd dialog dkms efibootmgr git gvfs-smb greetd htop ifplugd jq libinput linux-headers man netctl noto-fonts-emoji ntp openssh p7zip pipewire-pulse playerctl pulseaudio-alsa pulsemixer python python-pip ranger rsync scrot seahorse sshfs sudo ttf-dejavu ttf-font-awesome ttf-nerd-fonts-symbols udevil unzip upower vim wget wpa_supplicant wqy-zenhei zsh)
 
 x11_pkg=(feh redshift xorg-server xorg-xrandr)
 x11_aur=()
 wayland_pkg=(wayland wayland-protocols wlroots)
 wayland_aur=(redshift-wayland-git)
 
-i3_pkg=(arandr dunst feh i3lock i3status-rust i3-wm iw lightdm lightdm-gtk-greeter playerctl rofi xss-lock)
+i3_pkg=(arandr dunst feh i3lock i3status-rust i3-wm iw rofi xss-lock)
 i3_aur=(autotiling xidlehook)
-i3_greeter=lightdm
 
 sway_pkg=(sway swaybg swayidle swaylock wofi)
-sway_aur=(greetd greetd-gtkgreet sway-audio-idle-inhibit-git)
-sway_greeter=greetd
+sway_aur=(sway-audio-idle-inhibit-git)
 
 laptop_pkg=(xbindkeys xdotool)
 laptop_aur=(libinput-gestures)
@@ -27,7 +25,7 @@ laptop_aur=(libinput-gestures)
 desktop_aur=(amdgpu-fan obinskit rtl8814au-aircrack-dkms-git rtl8761b-fw)
 
 user_pkg=(ctags feh file-roller firefox gimp gparted gpicview gvfs-mtp gvfs-gphoto2 imv libreoffice lm_sensors octave qpdfview speedcrunch thunar thunar-volman thunar-archive-plugin thunderbird tumbler vivaldi vlc xfce4-settings zip)
-user_aur=(bitwarden-bin nextcloud-client plex-media-player spotify teams zoom ncspot)
+user_aur=(bitwarden-bin greetd-tuigreet nextcloud-client plex-media-player spotify teams zoom ncspot)
 
 is_x11=0
 
@@ -92,12 +90,10 @@ if [[ $wm_idx -eq 1 ]]; then
   wm_pkg=($i3_pkg $x11_pkg)
   wm_aur=($i3_aur $x11_aur)
   is_x11=1
-  greeter=$i3_greeter
   wm='i3'
 elif [[ $wm_idx -eq 2 ]]; then
   wm_pkg=($sway_pkg $wayland_pkg)
   wm_aur=($sway_aur $wayland_aur)
-  greeter=$sway_greeter
   wm='sway'
 fi
 
@@ -345,19 +341,19 @@ systemctl enable --now fstrim.timer
 systemctl enable --now systemd-timesycd.service
 set -e
 
-echo "Setup $greeter greeter"
+echo "Setup greetd"
 if [[ $wm == "sway" ]]; then
   cat <<EOF >/etc/greetd/config.toml
 [terminal]
 vt = 1
 
 [default_session]
-command = "agreety --cmd sway"
+command = "tuigreet --cmd sway"
 user = "greeter"
 EOF
 fi
-systemctl enable $greeter.service
-systemctl start $greeter.service
+systemctl enable greetd.service
+systemctl start greetd.service
 
 echo "Install dotfiles for root"
 cd /root
