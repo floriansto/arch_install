@@ -345,7 +345,7 @@ echo "Setup greetd"
 if [[ $wm == "sway" ]]; then
   cat <<EOF >/etc/greetd/config.toml
 [terminal]
-vt = 1
+vt = 2
 
 [default_session]
 command = "tuigreet --cmd sway"
