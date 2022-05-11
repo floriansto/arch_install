@@ -6,7 +6,7 @@ trap 'error_exit $LINENO $?' ERR SIGTERM SIGINT
 pacmans="pacman -S --noconfirm --needed"
 aur="paru -S --noconfirm --needed"
 
-base_pkg=(acpid acpilight alacritty alsa-utils avahi bat bluez bluez-utils cifs-utils cron cups curl dhcpcd dialog dkms efibootmgr git gvfs-smb greetd htop ifplugd jq libinput linux-headers man netctl noto-fonts-emoji ntp openssh p7zip pipewire-pulse playerctl pulseaudio-alsa pulsemixer python python-pip ranger rsync scrot seahorse sshfs sudo ttf-dejavu ttf-font-awesome ttf-nerd-fonts-symbols udevil unzip upower vim wget wpa_supplicant wqy-zenhei zsh)
+base_pkg=(acpid acpilight alacritty alsa-utils avahi bat bluez bluez-utils cifs-utils cron cups curl dhcpcd dialog dkms efibootmgr exa git gnome-keyring gvfs-smb greetd htop ifplugd jq libinput linux-headers man netctl noto-fonts-emoji ntp openssh p7zip pipewire-pulse playerctl pulseaudio-alsa pulsemixer python python-pip ranger rsync scrot seahorse sshfs sudo ttf-dejavu ttf-font-awesome ttf-nerd-fonts-symbols udevil unzip upower vim wget wpa_supplicant wqy-zenhei zsh)
 
 x11_pkg=(feh redshift xorg-server xorg-xrandr)
 x11_aur=()
@@ -24,8 +24,8 @@ laptop_aur=(libinput-gestures)
 
 desktop_aur=(amdgpu-fan obinskit rtl8814au-aircrack-dkms-git rtl8761b-fw)
 
-user_pkg=(ctags feh file-roller firefox gimp gparted gpicview gvfs-mtp gvfs-gphoto2 imv libreoffice lm_sensors octave qpdfview speedcrunch thunar thunar-volman thunar-archive-plugin thunderbird tumbler vivaldi vlc xfce4-settings zip)
-user_aur=(bitwarden-bin greetd-tuigreet nextcloud-client plex-media-player spotify teams zoom ncspot)
+user_pkg=(borg code ctags feh file-roller firefox gimp gparted gpicview gvfs-mtp gvfs-gphoto2 imv inkscape libreoffice lm_sensors neofetch octave pdftk qpdfview speedcrunch thunar thunar-volman thunar-archive-plugin thunderbird tumbler vivaldi vlc xfce4-settings zip)
+user_aur=(bitwarden-bin greetd-tuigreet nextcloud-client plex-media-player signal-desktop-beta-bin spotify teams zoom ncspot)
 
 is_x11=0
 
@@ -374,7 +374,7 @@ if [[ -d dotfiles ]];then
 fi
 sudo -u $user git clone https://github.com/floriansto/dotfiles.git
 if [[ $config -eq 1 ]]; then
-  sudo -u $user ./dotfiles/install.sh -v standard -e backlight -e battery -g -dw wlp6s0u2 -de enp4s0
+  sudo -u $user ./dotfiles/install.sh -v develop -e backlight -e battery -g -dw wlp6s0u1 -de enp4s0
 else
   sudo -u $user ./dotfiles/install.sh -v standard -g -dw wlp2s0 -de enp4s0
 fi
@@ -382,16 +382,9 @@ fi
 cd /opt
 git clone https://github.com/markasoftware/bing-wallpaper-linux.git
 
-echo "Set keymap"
-cat <<EOF >/etc/X11/xorg.conf.d/00-keyboard.conf
-Section "InputClass"
-    Identifier "system-keyboard"
-    MatchIsKeyboard "on"
-    Option "XkbLayout" "us"
-    Option "XkbVariant" "altgr-intl"
-EndSection
-EOF
-echo 'KEYMAP=en_US' > /etc/vconsole.conf
+echo "Set keymap to us-intl"
+localectl set-x11-keymap us "" intl
+echo 'KEYMAP=us-acentos' > /etc/vconsole.conf
 
 echo "smb fixes"
 if [[ ! -d /etc/samba ]]; then
@@ -400,9 +393,6 @@ fi
 cat <<EOF >/etc/samba/smb.conf
 [global]
     client min protocol = SMB3
-EOF
-cat <<EOF >/var/spool/cron/root
-@reboot killall gvfsd-smb-browse
 EOF
 
 echo "Install user packages"
@@ -419,12 +409,14 @@ cd /opt
 git clone https://github.com/floriansto/scripts_linux.git
 chown -R $user:users scripts_linux
 cat <<EOF >>/var/spool/cron/root
-*/30 * * * * /opt/scripts_linux/startBackup.sh $hostname 5176 > /dev/null 2>&1
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+@reboot killall gvfsd-smb-browse
+*/30 * * * * /opt/scripts_linux/startBackup.sh -n $hostname /etc /home /root /var/spool /dev/null 2>&1
 EOF
 cat <<EOF >/var/spool/cron/$user
 0 */2 * * * /opt/scripts_linux/backupPacman.sh > /dev/null
 EOF
-./keychron/install.sh
 
 echo "Setup ssh"
 ssh=/etc/ssh/sshd_config
